@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>MoonItem</AssemblyName>
+    <LangVersion>9.0</LangVersion>
     <Version>0.0.1</Version>
   </PropertyGroup>
 
@@ -49,6 +50,9 @@
     </Reference>
     <Reference Include="DOTween.Modules">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\managed\DOTween.Modules.dll</HintPath>
+    </Reference>
+    <Reference Include="DissonanceVoip">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\managed\DissonanceVoip.dll</HintPath>
     </Reference>
 
     <Reference Include="Newtonsoft.Json">
