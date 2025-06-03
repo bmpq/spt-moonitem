@@ -31,28 +31,29 @@ namespace tarkin.moonitem
         Item item;
         public GameObject itemObject;
         LootItem lootItem;
-        bool calledCreateStaticLoot;
+        MeshRenderer[] rends;
 
-        private static readonly Dictionary<string, ItemTemplate> _templates = new Dictionary<string, ItemTemplate>();
+        float moonSize = 2.2f;
 
-
-        internal static void SpawnTemplate(string template, Player player, Func<ItemTemplate, bool> filter)
-        {
-            var result = TemplateHelper.FindTemplates(template).FirstOrDefault();
-
-            if (result == null)
-                return;
-
-            SpawnTemplate(result, player);
-        }
+        bool lootable;
 
         void Start()
         {
-            SpawnTemplate("683e1aca717050d545879d90", player, null);
+            if (TOD_Sky.Instance == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            SpawnTemplate("683e1aca717050d545879d90", player);
         }
 
-        private static void SpawnTemplate(ItemTemplate template, Player player)
+        private static void SpawnTemplate(string templateId, Player player)
         {
+            var template = TemplateHelper.FindTemplates(templateId).FirstOrDefault();
+
+            if (template == null)
+                return;
+
             var poolManager = Singleton<PoolManagerClass>.Instance;
 
             poolManager
@@ -90,7 +91,8 @@ namespace tarkin.moonitem
                                 lootItem.transform.SetPositionAndRotation(position, transform.rotation);
                                 lootItem.LastOwner = player;
 
-                                SetupItem(itemFactory, item, lootItem);
+                                TheMoonItemController.Instance.itemObject = lootItem.TrackableTransform.gameObject;
+                                item.SpawnedInSession = true; // found in raid
                             }
                         }
                     });
@@ -99,28 +101,34 @@ namespace tarkin.moonitem
                 });
         }
 
-        private static void SetupItem(ItemFactoryClass itemFactory, Item item, LootItem lootItem)
+        bool IsLookingAtMoon(Camera cam)
         {
-            // ugly, wrote wehn i was eepy, todo cleanup
-            TheMoonItemController.Instance.itemObject = lootItem.TrackableTransform.gameObject;
-
-            item.SpawnedInSession = true; // found in raid
-
+            return Vector3.Angle(cam.transform.forward, TOD_Sky.Instance.MoonDirection) < moonSize;
         }
 
-        void FixedUpdate()
-        {
-
-        }
-
-        void Update()
+        void LateUpdate() // after input and procedural animations
         {
             if (itemObject == null)
                 return;
 
-            if (player != null)
+            if (rends == null)
             {
-                itemObject.transform.position = player.Position + new Vector3(0, 1.6f, 0) + player.Transform.Original.forward * 0.7f;
+                rends = itemObject.GetComponentsInChildren<MeshRenderer>();
+                foreach (var rend in rends)
+                {
+                    rend.forceRenderingOff = true;
+                }
+            }
+
+            lootable = IsLookingAtMoon(CameraClass.Instance.Camera);
+
+            if (lootable)
+            {
+                itemObject.transform.position = CameraClass.Instance.Camera.transform.position + CameraClass.Instance.Camera.transform.forward * 0.7f;
+            }
+            else
+            {
+                itemObject.transform.position = new Vector3(0, -1000, 0);
             }
         }
     }
