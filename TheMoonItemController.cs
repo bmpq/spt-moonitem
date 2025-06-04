@@ -26,6 +26,8 @@ namespace tarkin.moonitem
             }
         }
         private static TheMoonItemController _instance;
+
+        const string guidMoon = "683e1aca717050d545879d90";
         Player player => Singleton<GameWorld>.Instance.MainPlayer;
 
         Item item;
@@ -36,15 +38,38 @@ namespace tarkin.moonitem
         float moonSize = 2.2f;
 
         bool lootable;
+        bool looted;
 
-        void Start()
+        void OnEnable()
         {
+            player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
+
             if (TOD_Sky.Instance == null)
             {
                 Destroy(gameObject);
                 return;
             }
-            SpawnTemplate("683e1aca717050d545879d90", player);
+            SpawnTemplate(guidMoon, player);
+        }
+
+        private void InventoryController_AddItemEvent(GEventArgs2 obj)
+        {
+            Item grabbedItem = obj.Item;
+
+            if (looted || grabbedItem?.StringTemplateId != guidMoon)
+                return;
+
+            looted = true;
+
+            TOD_Sky.Instance.Night.LightIntensity = 0;
+            TOD_Sky.Instance.Components.MoonRenderer.gameObject.SetActive(false);
+        }
+
+        void OnDisable()
+        {
+            if (player?.InventoryController == null)
+                return;
+            player.InventoryController.AddItemEvent -= InventoryController_AddItemEvent;
         }
 
         private static void SpawnTemplate(string templateId, Player player)
@@ -108,7 +133,7 @@ namespace tarkin.moonitem
 
         void LateUpdate() // after input and procedural animations
         {
-            if (itemObject == null)
+            if (looted || itemObject == null)
                 return;
 
             if (rends == null)
