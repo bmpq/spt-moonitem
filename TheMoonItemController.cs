@@ -40,6 +40,8 @@ namespace tarkin.moonitem
         bool lootable;
         bool looted;
 
+        bool lineOfSight;
+
         void OnEnable()
         {
             player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
@@ -131,6 +133,33 @@ namespace tarkin.moonitem
             return Vector3.Angle(cam.transform.forward, TOD_Sky.Instance.MoonDirection) < moonSize;
         }
 
+        void FixedUpdate()
+        {
+            if (CameraClass.Instance.Camera == null || TOD_Sky.Instance == null)
+                return;
+            Vector3 cameraPos = CameraClass.Instance.Camera.transform.position;
+            lineOfSight = HasLineOfSightToTarget(cameraPos, TOD_Sky.Instance.MoonDirection);
+        }
+
+        private bool HasLineOfSightToTarget(Vector3 currentPosition, Vector3 dir)
+        {
+            Vector3 rayOrigin = currentPosition;
+
+            Vector3 directionToTargetNormalized = dir.normalized;
+
+            LayerMask layerMask = LayerMaskClass.HighPolyWithTerrainMask;
+
+            bool isObstructed = Physics.Raycast(
+                rayOrigin,
+                directionToTargetNormalized,
+                out RaycastHit hit,
+                float.MaxValue,
+                layerMask,
+                QueryTriggerInteraction.Ignore);
+
+            return !isObstructed;
+        }
+
         void LateUpdate() // after input and procedural animations
         {
             if (looted || itemObject == null)
@@ -145,7 +174,7 @@ namespace tarkin.moonitem
                 }
             }
 
-            lootable = IsLookingAtMoon(CameraClass.Instance.Camera);
+            lootable = lineOfSight && IsLookingAtMoon(CameraClass.Instance.Camera);
 
             if (lootable)
             {
