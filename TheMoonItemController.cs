@@ -46,12 +46,34 @@ namespace tarkin.moonitem
         {
             player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
 
+            Patch_LootItem_CreateLootWithRigidbody.OnPostfix += Patch_LootItem_CreateLootWithRigidbody_OnPostfix;
+
             if (TOD_Sky.Instance == null)
             {
                 Destroy(gameObject);
                 return;
             }
             SpawnTemplate(guidMoon, player);
+        }
+
+        private void Patch_LootItem_CreateLootWithRigidbody_OnPostfix(LootItem obj)
+        {
+            MeshRenderer[] rends = obj.GetComponentsInChildren<MeshRenderer>();
+
+            foreach (var rend in rends)
+            {
+                rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                foreach (var mat in rend.materials)
+                {
+                    mat.SetVector("_SpecVals", new Vector4(9, 111, 0, 0));
+                }
+            }
+
+            Collider col = obj.GetComponentInChildren<Collider>();
+            Light light = col.gameObject.GetOrAddComponent<Light>();
+            light.intensity = looted ? 2f : 0;
+            light.range = 5;
+            light.shadows = LightShadows.Hard;
         }
 
         private void InventoryController_AddItemEvent(GEventArgs2 obj)
@@ -69,6 +91,8 @@ namespace tarkin.moonitem
 
         void OnDisable()
         {
+            Patch_LootItem_CreateLootWithRigidbody.OnPostfix -= Patch_LootItem_CreateLootWithRigidbody_OnPostfix;
+
             if (player?.InventoryController == null)
                 return;
             player.InventoryController.AddItemEvent -= InventoryController_AddItemEvent;
