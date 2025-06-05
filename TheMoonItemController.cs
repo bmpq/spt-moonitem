@@ -42,8 +42,12 @@ namespace tarkin.moonitem
 
         bool lineOfSight;
 
+        bool scale;
+
         void OnEnable()
         {
+            scale = Random.Range(0f, 100f) < 0.3f;
+
             player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
 
             Patch_LootItem_CreateLootWithRigidbody.OnPostfix += Patch_LootItem_CreateLootWithRigidbody_OnPostfix;
@@ -69,7 +73,7 @@ namespace tarkin.moonitem
                 rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 foreach (var mat in rend.materials)
                 {
-                    mat.SetVector("_SpecVals", new Vector4(9, 111, 0, 0));
+                    mat.SetVector("_SpecVals", new Vector4(9, 90f, 0, 0));
                 }
             }
 
@@ -93,6 +97,11 @@ namespace tarkin.moonitem
                 TOD_Sky.Instance.Night.LightIntensity = 0;
                 TOD_Sky.Instance.Components.MoonRenderer.gameObject.SetActive(false);
 
+                foreach (var lamp in LocationScene.GetAllObjects<LampController>(false))
+                {
+                    lamp.Switch(Turnable.EState.Destroyed);
+                }
+            }
         }
 
         void OnDisable()
@@ -192,6 +201,9 @@ namespace tarkin.moonitem
 
         void LateUpdate() // after input and procedural animations
         {
+            if (scale)
+                TOD_Sky.Instance.Components.MoonTransform.localScale += new Vector3(12f, 12f, 12f) * Time.deltaTime;
+
             if (looted || itemObject == null)
                 return;
 
