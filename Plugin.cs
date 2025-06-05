@@ -25,6 +25,7 @@ namespace tarkin.moonitem
             { 
                 new GameObject("TheMoonItemController").AddComponent<TheMoonItemController>(); 
             };
+            IconReplacer.init = true;
 
             InitConfiguration();
             EnableAllPatches();

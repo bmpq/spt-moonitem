@@ -64,6 +64,9 @@
     <Reference Include="Unity.TextMeshPro">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Unity.TextMeshPro.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <Target Name="CopyDllAfterBuild" AfterTargets="Build">

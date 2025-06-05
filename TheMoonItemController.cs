@@ -27,7 +27,7 @@ namespace tarkin.moonitem
         }
         private static TheMoonItemController _instance;
 
-        const string guidMoon = "683e1aca717050d545879d90";
+        public const string guidMoon = "683e1aca717050d545879d90";
         Player player => Singleton<GameWorld>.Instance.MainPlayer;
 
         Item item;
