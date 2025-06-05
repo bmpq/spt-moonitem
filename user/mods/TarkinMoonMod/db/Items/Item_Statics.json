@@ -1,0 +1,42 @@
+{
+    "683e1aca717050d545879d90": {
+        "itemTplToClone": "573474f924597738002c6174",
+        "parentId": "57864a3d24597754843f8721",
+        "handbookParentId": "5b47574386f77428ca22b2f1",
+        "overrideProperties": {
+            "Prefab": {
+                "path": "moon.bundle",
+                "rcid": ""
+            },
+            "ExaminedByDefault": false,
+            "Height": 4,
+            "Width": 4,
+            "Weight": 73476730919833454761245
+        },
+        "locales": {
+            "en": {
+                "name": "The Moon",
+                "shortName": "The Moon",
+                "description": "The only natural satellite of our planet. Smells faintly of cheese and existential dread."
+            }
+        },
+        "clearClonedProps": false,
+        "addtoInventorySlots": [],
+        "addtoModSlots": false,
+        "modSlot": [
+            "mod_muzzle"
+        ],
+        "ModdableItemWhitelist": [],
+        "ModdableItemBlacklist": [],
+        "fleaPriceRoubles": 243236,
+        "handbookPriceRoubles": 173740,
+        "IsUnbuyable": true,
+        "addtoTraders": false,
+        "addtoBots": false,
+        "addtoStaticLootContainers": false,
+        "addtoHallOfFame": ["bigTrophies"],
+        "Probability": 250,
+        "traders": {},
+        "StaticLootContainers": []
+    }
+}
