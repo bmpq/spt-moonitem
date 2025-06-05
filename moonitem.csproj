@@ -54,6 +54,9 @@
     <Reference Include="DissonanceVoip">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\managed\DissonanceVoip.dll</HintPath>
     </Reference>
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>$(SPTPath)\EscapeFromTarkov_Data\managed\Sirenix.Serialization.dll</HintPath>
+    </Reference>
 
     <Reference Include="Newtonsoft.Json">
       <HintPath>$(SPTPath)\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>

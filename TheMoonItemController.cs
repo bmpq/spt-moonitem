@@ -58,6 +58,10 @@ namespace tarkin.moonitem
 
         private void Patch_LootItem_CreateLootWithRigidbody_OnPostfix(LootItem obj)
         {
+            Item grabbedItem = obj.Item;
+            if (grabbedItem?.StringTemplateId != guidMoon)
+                return;
+
             MeshRenderer[] rends = obj.GetComponentsInChildren<MeshRenderer>();
 
             foreach (var rend in rends)
@@ -83,10 +87,12 @@ namespace tarkin.moonitem
             if (looted || grabbedItem?.StringTemplateId != guidMoon)
                 return;
 
-            looted = true;
+            if (obj.Item.SpawnedInSession)
+            {
+                looted = true;
+                TOD_Sky.Instance.Night.LightIntensity = 0;
+                TOD_Sky.Instance.Components.MoonRenderer.gameObject.SetActive(false);
 
-            TOD_Sky.Instance.Night.LightIntensity = 0;
-            TOD_Sky.Instance.Components.MoonRenderer.gameObject.SetActive(false);
         }
 
         void OnDisable()
