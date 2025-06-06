@@ -48,9 +48,11 @@ namespace tarkin.moonitem
             if (timeHiding > 0)
                 return;
 
-            if (Mathf.Abs(Mathf.DeltaAngle(transform.eulerAngles.y, CameraClass.Instance.Camera.transform.eulerAngles.y)) < 90f)
+            Transform _cameraTransform = CameraClass.Instance.Camera.transform;
+
+            if (Vector3.Angle(_cameraTransform.forward, transform.forward) < 90f)
             {
-                if (Mathf.Abs(Mathf.DeltaAngle(transform.eulerAngles.y, CameraClass.Instance.Camera.transform.eulerAngles.y)) < 30f)
+                if (Vector3.Angle(_cameraTransform.forward, transform.forward) < 30f)
                 {
                     Singleton<GameWorld>.Instance.MainPlayer.KillMe(EBodyPartColliderType.Eyes, 7347);
                 }

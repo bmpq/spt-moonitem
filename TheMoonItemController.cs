@@ -310,6 +310,7 @@ namespace tarkin.moonitem
                     MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Close();
 
                     GameObject moon00 = Instantiate(AssetBundleLoader.LoadAssetBundle(Plugin.BundleName).LoadAsset<GameObject>("moon_00_0_prefab"));
+                    AssetBundleLoader.ReplaceShadersToNative(moon00);
                     moon00.AddComponent<TheF>();
 
                     textTimerPanel?.SetText(Plugin.GetComingText("474F442049532048455245"));
