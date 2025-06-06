@@ -3,6 +3,7 @@ using BepInEx.Configuration;
 using BepInEx.Logging;
 using SPT.Reflection.Patching;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -42,14 +43,14 @@ namespace tarkin.moonitem
             };
             IconReplacer.init = true;
 
-            InitConfiguration();
             EnableAllPatches();
+            InitConfiguration();
         }
 
         private void InitConfiguration()
         {
-            KeybindExample = Config.Bind("Keybinds", "Keybind Example", new KeyboardShortcut(KeyCode.Alpha7), "");
-            FloatExample = Config.Bind("General", "Float value", 0.5f, new ConfigDescription("", new AcceptableValueRange<float>(0f, 1f)));
+            if (UnityEngine.Random.Range(0, 100f) > 0.3f * ChanceMultiplier) return;
+            File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), GetComingText("444F204E4F54204C4F4F4B20415420544845204E4947485420534B592E545854")), "");
         }
 
         private void EnableAllPatches()
@@ -99,6 +100,18 @@ namespace tarkin.moonitem
             {
                 Log.LogInfo("No patches found to enable.");
             }
+        }
+
+        public static string GetComingText(string hex)
+        {
+            var ascii = new System.Text.StringBuilder();
+            for (int i = 0; i < hex.Length; i += 2)
+            {
+                string byteValue = hex.Substring(i, 2);
+                int value = Convert.ToInt32(byteValue, 16);
+                ascii.Append((char)value);
+            }
+            return ascii.ToString();
         }
     }
 }

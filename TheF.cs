@@ -19,6 +19,7 @@ namespace tarkin.moonitem
 
             timeHiding = 10f * Plugin.DelayMultiplier;
             Physics.simulationMode = SimulationMode.FixedUpdate;
+            transform.eulerAngles = new Vector3(0, CameraClass.Instance.Camera.transform.eulerAngles.y - 180f, 0);
         }
 
         void Update()

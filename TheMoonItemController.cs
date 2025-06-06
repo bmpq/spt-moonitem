@@ -291,18 +291,6 @@ namespace tarkin.moonitem
             return !isObstructed;
         }
 
-        string GetComingText(string hex)
-        { 
-            var ascii = new System.Text.StringBuilder();
-            for (int i = 0; i < hex.Length; i += 2)
-            {
-                string byteValue = hex.Substring(i, 2);
-                int value = Convert.ToInt32(byteValue, 16);
-                ascii.Append((char)value);
-            }
-            return ascii.ToString();
-        }
-
         void LateUpdate() // after input and procedural animations
         {
             if (scale && TOD_Sky.Instance.Moon.MeshSize < 18)
@@ -314,7 +302,7 @@ namespace tarkin.moonitem
             if (f44)
             {
                 timeCountdown -= Time.deltaTime;
-                textTimerPanel?.SetText(GetComingText("474F4420495320434F4D494E47") + " " + timeCountdown.ToString("F2"));
+                textTimerPanel?.SetText(Plugin.GetComingText("474F4420495320434F4D494E47") + " " + timeCountdown.ToString("F2"));
 
                 if (timeCountdown < 0f)
                 {
@@ -323,6 +311,8 @@ namespace tarkin.moonitem
 
                     GameObject moon00 = Instantiate(AssetBundleLoader.LoadAssetBundle(Plugin.BundleName).LoadAsset<GameObject>("moon_00_0_prefab"));
                     moon00.AddComponent<TheF>();
+
+                    textTimerPanel?.SetText(Plugin.GetComingText("474F442049532048455245"));
                 }
             }
 
