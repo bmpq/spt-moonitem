@@ -15,6 +15,8 @@ using EFT.UI;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine.UI;
+using EFT.UI.BattleTimer;
+using TMPro;
 
 namespace tarkin.moonitem
 {
@@ -47,13 +49,20 @@ namespace tarkin.moonitem
 
         bool lineOfSight;
 
+        bool f44;
+        float timeCountdown = 30;
+
         bool scale;
         float scaleSpeed = 0.1f;
 
         GameObject iconEffect;
 
+        TextMeshProUGUI textTimerPanel;
+
         void OnEnable()
         {
+            AssetBundleLoader.LoadAssetBundle(Plugin.BundleName);
+
             scale = Random.Range(0f, 100f) < 0.3f * Plugin.ChanceMultiplier;
 
             player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
@@ -68,6 +77,22 @@ namespace tarkin.moonitem
             SpawnTemplate(guidMoon, player);
 
             ToggleMoonHealthEffect(CheckIfPlayerHasMoonInInventory());
+
+            CoroutineRunner.RunAfterDelay(() => Coming(), 5f);
+        }
+
+        void Coming()
+        {
+            f44 = Random.Range(0f, 100f) < 0.1f * Plugin.ChanceMultiplier;
+            if (!f44)
+                return;
+
+            MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
+            textTimerPanel = MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.GetComponentInChildren<TextMeshProUGUI>();
+            RectTransform panel = MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.transform.GetChild(0) as RectTransform;
+            panel.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            panel.sizeDelta = new Vector2(318, 51);
+            panel.GetComponent<Image>().color = Color.red;
         }
 
         bool CheckIfPlayerHasMoonInInventory()
@@ -259,12 +284,38 @@ namespace tarkin.moonitem
             return !isObstructed;
         }
 
+        string GetComingText(string hex)
+        { 
+            var ascii = new System.Text.StringBuilder();
+            for (int i = 0; i < hex.Length; i += 2)
+            {
+                string byteValue = hex.Substring(i, 2);
+                int value = Convert.ToInt32(byteValue, 16);
+                ascii.Append((char)value);
+            }
+            return ascii.ToString();
+        }
+
         void LateUpdate() // after input and procedural animations
         {
             if (scale && TOD_Sky.Instance.Moon.MeshSize < 18)
             {
-                scaleSpeed += Time.deltaTime * 0.01f;
-                TOD_Sky.Instance.Moon.MeshSize += scaleSpeed * Time.deltaTime;
+                scaleSpeed += Time.deltaTime * 0.02f;
+                TOD_Sky.Instance.Moon.MeshSize += scaleSpeed * Time.deltaTime * 0.1f;
+            }
+
+            if (f44)
+            {
+                timeCountdown -= Time.deltaTime;
+                TOD_Sky.Instance.Day.LightIntensity += (30f - timeCountdown) * Time.deltaTime * 0.1f;
+                TOD_Sky.Instance.Night.LightIntensity += (30f - timeCountdown) * Time.deltaTime * 0.1f;
+                textTimerPanel?.SetText(GetComingText("474F4420495320434F4D494E47") + " " + timeCountdown.ToString("F2"));
+
+                if (timeCountdown < 0f)
+                {
+                    f44 = false;
+                    MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Close();
+                }
             }
 
             if (looted || itemObject == null)
