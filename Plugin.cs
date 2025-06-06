@@ -15,9 +15,6 @@ namespace tarkin.moonitem
     {
         internal static new ManualLogSource Log;
 
-        internal static ConfigEntry<KeyboardShortcut> KeybindExample;
-        internal static ConfigEntry<float> FloatExample;
-
         public const string BundleName = "moonitem";
         public const float ChanceMultiplier =
 #if !DEBUG
@@ -30,7 +27,7 @@ namespace tarkin.moonitem
 #if !DEBUG
             1f;
 #else
-            0.01f;
+            0.1f;
 #endif
 
         private void Awake()
@@ -45,6 +42,8 @@ namespace tarkin.moonitem
 
             EnableAllPatches();
             InitConfiguration();
+
+            Patch_MenuPlayerPoser_LateUpdate.enabled = (UnityEngine.Random.Range(0, 100f) < 2f * ChanceMultiplier);
         }
 
         private void InitConfiguration()
