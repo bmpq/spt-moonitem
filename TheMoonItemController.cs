@@ -53,7 +53,7 @@ namespace tarkin.moonitem
 
         void OnEnable()
         {
-            scale = Random.Range(0f, 100f) < 0.3f;
+            scale = Random.Range(0f, 100f) < 0.3f * Plugin.ChanceMultiplier;
 
             player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
 
@@ -79,6 +79,8 @@ namespace tarkin.moonitem
             if (iconEffect != null)
             {
                 iconEffect.SetActive(on);
+
+                BreakLegs();
                 return;
             }
 
@@ -93,6 +95,14 @@ namespace tarkin.moonitem
             iconEffect = new GameObject("IconMoonEffect");
             iconEffect.AddComponent<Image>().sprite = AssetBundleLoader.LoadAssetBundle(Plugin.BundleName).LoadAsset<Sprite>("effect_icon_moon");
             iconEffect.transform.SetParent(_effectsPanel.transform);
+
+            BreakLegs();
+        }
+
+        void BreakLegs()
+        {
+            player.ActiveHealthController.DoFracture(EBodyPart.LeftLeg);
+            player.ActiveHealthController.DoFracture(EBodyPart.RightLeg);
         }
 
         private void OnThrowItem(Item item, LootItem lootItem)
