@@ -61,6 +61,8 @@ namespace tarkin.moonitem
 
         TextMeshProUGUI textTimerPanel;
 
+        BetterSource betterSource;
+
         void OnEnable()
         {
             AssetBundleLoader.LoadAssetBundle(Plugin.BundleName);
@@ -100,6 +102,9 @@ namespace tarkin.moonitem
             panel.GetComponent<ContentSizeFitter>().horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
             panel.sizeDelta = new Vector2(318, 51);
             panel.GetComponent<Image>().color = Color.red;
+
+            betterSource = Singleton<BetterAudio>.Instance.GetSource(BetterAudio.AudioSourceGroupType.Character, true);
+            betterSource.Play(AssetBundleLoader.LoadAssetBundle(Plugin.BundleName).LoadAsset<AudioClip>("f44_audio"), null, default);
         }
 
         bool CheckIfPlayerHasMoonInInventory()
@@ -293,6 +298,11 @@ namespace tarkin.moonitem
 
         void LateUpdate() // after input and procedural animations
         {
+            if (betterSource != null)
+            {
+                betterSource.Position = CameraClass.Instance.Camera.transform.position + new Vector3(0, 0.1f, 0);
+            }
+
             if (scale && TOD_Sky.Instance.Moon.MeshSize < 18)
             {
                 scaleSpeed += Time.deltaTime * 0.02f;
