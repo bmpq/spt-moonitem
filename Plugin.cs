@@ -25,6 +25,13 @@ namespace tarkin.moonitem
             100000f;
 #endif
 
+        public const float DelayMultiplier =
+#if !DEBUG
+            1f;
+#else
+            0.01f;
+#endif
+
         private void Awake()
         {
             Log = base.Logger;

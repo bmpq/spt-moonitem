@@ -50,10 +50,12 @@ namespace tarkin.moonitem
         bool lineOfSight;
 
         bool f44;
-        float timeCountdown = 30;
+        float timeCountdown = 57;
 
         bool scale;
         float scaleSpeed = 0.1f;
+
+        bool lightevent;
 
         GameObject iconEffect;
 
@@ -64,6 +66,7 @@ namespace tarkin.moonitem
             AssetBundleLoader.LoadAssetBundle(Plugin.BundleName);
 
             scale = Random.Range(0f, 100f) < 0.3f * Plugin.ChanceMultiplier;
+            lightevent = Random.Range(0f, 100f) < 0.2f * Plugin.ChanceMultiplier;
 
             player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
 
@@ -77,15 +80,19 @@ namespace tarkin.moonitem
             SpawnTemplate(guidMoon, player);
 
             ToggleMoonHealthEffect(CheckIfPlayerHasMoonInInventory());
+            
+            CoroutineRunner.RunAfterDelay(() => Coming(), 180f * Plugin.DelayMultiplier);
 
-            CoroutineRunner.RunAfterDelay(() => Coming(), 5f);
+
         }
 
         void Coming()
         {
-            f44 = Random.Range(0f, 100f) < 0.1f * Plugin.ChanceMultiplier;
+            f44 = Random.Range(0f, 100f) < 0.2f * Plugin.ChanceMultiplier;
             if (!f44)
                 return;
+
+            timeCountdown = 57f * Plugin.DelayMultiplier;
 
             MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
             textTimerPanel = MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.GetComponentInChildren<TextMeshProUGUI>();
@@ -307,14 +314,27 @@ namespace tarkin.moonitem
             if (f44)
             {
                 timeCountdown -= Time.deltaTime;
-                TOD_Sky.Instance.Day.LightIntensity += (30f - timeCountdown) * Time.deltaTime * 0.1f;
-                TOD_Sky.Instance.Night.LightIntensity += (30f - timeCountdown) * Time.deltaTime * 0.1f;
                 textTimerPanel?.SetText(GetComingText("474F4420495320434F4D494E47") + " " + timeCountdown.ToString("F2"));
 
                 if (timeCountdown < 0f)
                 {
                     f44 = false;
                     MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Close();
+
+                    GameObject moon00 = Instantiate(AssetBundleLoader.LoadAssetBundle(Plugin.BundleName).LoadAsset<GameObject>("moon_00_0_prefab"));
+                    moon00.AddComponent<TheF>();
+                }
+            }
+
+            if (lightevent)
+            {
+                timeCountdown -= Time.deltaTime;
+                TOD_Sky.Instance.Day.LightIntensity += (30f - timeCountdown) * Time.deltaTime * 0.01f;
+                TOD_Sky.Instance.Night.LightIntensity += (30f - timeCountdown) * Time.deltaTime * 0.01f;
+
+                if (timeCountdown < 0f)
+                {
+                    Singleton<GameWorld>.Instance.MainPlayer.KillMe(EBodyPartColliderType.Eyes, 7347);
                 }
             }
 
