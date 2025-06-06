@@ -22,7 +22,7 @@ namespace tarkin.moonitem
         [PatchPostfix]
         private static void PatchPostfix(GridItemView __instance, TextMeshProUGUI ___Caption)
         {
-            if (UnityEngine.Random.Range(0, 100f) > 0.05f)
+            if (UnityEngine.Random.Range(0, 100f) > 0.05f * Plugin.ChanceMultiplier)
                 return;
 
             CoroutineRunner.Instance.StartCoroutine(Animation(___Caption));
@@ -32,7 +32,7 @@ namespace tarkin.moonitem
 
         static IEnumerator Animation(TextMeshProUGUI caption)
         {
-            TextAsset textAsset = AssetBundleLoader.LoadAssetBundle("moonitem").LoadAsset<TextAsset>("captions");
+            TextAsset textAsset = AssetBundleLoader.LoadAssetBundle(Plugin.BundleName).LoadAsset<TextAsset>("captions");
             if (textAsset == null)
             {
                 yield break;

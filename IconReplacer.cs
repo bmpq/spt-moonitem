@@ -22,23 +22,27 @@ namespace tarkin.moonitem
             if (__instance.Item.StringTemplateId != TheMoonItemController.guidMoon)
                 return;
 
-            if (Random.Range(0, 100f) > 0.7f)
+            if (Random.Range(0, 100f) > 0.7f * Plugin.ChanceMultiplier)
                 return;
 
             Sprite originalSprite = ___MainImage.sprite;
 
-            ___MainImage.sprite = AssetBundleLoader.LoadAssetBundle("moonitem").LoadAsset<Sprite>("13");
+            ___MainImage.sprite = AssetBundleLoader.LoadAssetBundle(Plugin.BundleName).LoadAsset<Sprite>("13");
 
             ___MainImage.SetNativeSize();
             LayoutRebuilder.ForceRebuildLayoutImmediate(___MainImage.rectTransform);
             __instance.UpdateScale();
+
+#if DEBUG
+            Plugin.Log.LogInfo("Icon replaced");
+#endif
 
             CoroutineRunner.Instance.StartCoroutine(RevertSpriteAfterDelay(__instance, ___MainImage, originalSprite));
         }
 
         private static IEnumerator RevertSpriteAfterDelay(ItemView itemView, Image mainImage, Sprite originalSprite)
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 3; i++)
             {
                 yield return new WaitForEndOfFrame();
             }

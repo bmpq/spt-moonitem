@@ -17,6 +17,14 @@ namespace tarkin.moonitem
         internal static ConfigEntry<KeyboardShortcut> KeybindExample;
         internal static ConfigEntry<float> FloatExample;
 
+        public const string BundleName = "moonitem";
+        public const float ChanceMultiplier =
+#if !DEBUG
+            1f;
+#else
+            100000f;
+#endif
+
         private void Awake()
         {
             Log = base.Logger;

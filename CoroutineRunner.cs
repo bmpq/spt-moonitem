@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using UnityEngine;
 
 namespace tarkin.moonitem
 {
@@ -16,5 +18,13 @@ namespace tarkin.moonitem
         }
 
         private static CoroutineRunner _instance;
+
+        public static void RunAfterDelay(Action action, float delay) => Instance.StartCoroutine(Instance.Delay(action, delay));
+        IEnumerator Delay(Action action, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            action.Invoke();
+        }
     }
 }

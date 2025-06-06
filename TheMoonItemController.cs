@@ -11,6 +11,10 @@ using System.Linq;
 using Diz.Utils;
 using System.Collections.Generic;
 using EFT.CameraControl;
+using EFT.UI;
+using System.Reflection;
+using HarmonyLib;
+using UnityEngine.UI;
 
 namespace tarkin.moonitem
 {
@@ -28,6 +32,7 @@ namespace tarkin.moonitem
         private static TheMoonItemController _instance;
 
         public const string guidMoon = "683e1aca717050d545879d90";
+        GameWorld gameWorld => Singleton<GameWorld>.Instance;
         Player player => Singleton<GameWorld>.Instance.MainPlayer;
 
         Item item;
@@ -35,14 +40,16 @@ namespace tarkin.moonitem
         LootItem lootItem;
         MeshRenderer[] rends;
 
-        float moonSize = 2.2f;
+        const float moonSize = 2.2f;
 
         bool lootable;
-        bool looted;
+        bool looted => TOD_Sky.Instance.Night.LightIntensity <= 0f;
 
         bool lineOfSight;
 
         bool scale;
+
+        GameObject iconEffect;
 
         void OnEnable()
         {
@@ -50,7 +57,7 @@ namespace tarkin.moonitem
 
             player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
 
-            Patch_LootItem_CreateLootWithRigidbody.OnPostfix += Patch_LootItem_CreateLootWithRigidbody_OnPostfix;
+            Patch_GameWorld_ThrowItem.OnPostfix += OnThrowItem;
 
             if (TOD_Sky.Instance == null)
             {
@@ -58,15 +65,53 @@ namespace tarkin.moonitem
                 return;
             }
             SpawnTemplate(guidMoon, player);
+
+            ToggleMoonHealthEffect(CheckIfPlayerHasMoonInInventory());
         }
 
-        private void Patch_LootItem_CreateLootWithRigidbody_OnPostfix(LootItem obj)
+        bool CheckIfPlayerHasMoonInInventory()
         {
-            Item grabbedItem = obj.Item;
-            if (grabbedItem?.StringTemplateId != guidMoon)
+            return player.Inventory.GetPlayerItems(EPlayerItems.Equipment).Any(item => item.TemplateId == guidMoon);
+        }
+
+        private void ToggleMoonHealthEffect(bool on)
+        {
+            if (iconEffect != null)
+            {
+                iconEffect.SetActive(on);
+                return;
+            }
+
+            if (!on)
                 return;
 
-            MeshRenderer[] rends = obj.GetComponentsInChildren<MeshRenderer>();
+            FieldInfo fieldCharacterHealthPanel = AccessTools.Field(typeof(EftBattleUIScreen), "_characterHealthPanel");
+            CharacterHealthPanel healthPanel = fieldCharacterHealthPanel.GetValue(MonoBehaviourSingleton<CommonUI>.Instance.EftBattleUIScreen) as CharacterHealthPanel;
+
+            FieldInfo fieldEffectPanel = AccessTools.Field(typeof(CharacterHealthPanel), "_effectsPanel");
+            GameObject _effectsPanel = fieldEffectPanel.GetValue(healthPanel) as GameObject;
+            iconEffect = new GameObject("IconMoonEffect");
+            iconEffect.AddComponent<Image>().sprite = AssetBundleLoader.LoadAssetBundle(Plugin.BundleName).LoadAsset<Sprite>("effect_icon_moon");
+            iconEffect.transform.SetParent(_effectsPanel.transform);
+        }
+
+        private void OnThrowItem(Item item, LootItem lootItem)
+        {
+            CoroutineRunner.RunAfterDelay(() => OnMoonDrop(item, lootItem), 0.1f);
+        }
+
+        void OnMoonDrop(Item item, LootItem lootItem)
+        {
+            ToggleMoonHealthEffect(CheckIfPlayerHasMoonInInventory());
+
+            Item moon = item.GetRootItem().GetAllItems().FirstOrDefault(item => item?.TemplateId == guidMoon);
+            if (moon == null)
+                return;
+
+            if (lootItem == null)
+                return;
+
+            MeshRenderer[] rends = lootItem.GetComponentsInChildren<MeshRenderer>();
 
             foreach (var rend in rends)
             {
@@ -77,9 +122,9 @@ namespace tarkin.moonitem
                 }
             }
 
-            Collider col = obj.GetComponentInChildren<Collider>();
+            Collider col = lootItem.GetComponentInChildren<Collider>();
             Light light = col.gameObject.GetOrAddComponent<Light>();
-            light.intensity = looted ? 2f : 0;
+            light.intensity = item.SpawnedInSession && !looted ? 0 : 2f;
             light.range = 5;
             light.shadows = LightShadows.Hard;
         }
@@ -88,12 +133,16 @@ namespace tarkin.moonitem
         {
             Item grabbedItem = obj.Item;
 
-            if (looted || grabbedItem?.StringTemplateId != guidMoon)
+            if (grabbedItem?.StringTemplateId != guidMoon)
+                return;
+
+            ToggleMoonHealthEffect(CheckIfPlayerHasMoonInInventory());
+
+            if (looted)
                 return;
 
             if (obj.Item.SpawnedInSession)
             {
-                looted = true;
                 TOD_Sky.Instance.Night.LightIntensity = 0;
                 TOD_Sky.Instance.Components.MoonRenderer.gameObject.SetActive(false);
 
@@ -106,7 +155,7 @@ namespace tarkin.moonitem
 
         void OnDisable()
         {
-            Patch_LootItem_CreateLootWithRigidbody.OnPostfix -= Patch_LootItem_CreateLootWithRigidbody_OnPostfix;
+            Patch_GameWorld_ThrowItem.OnPostfix -= OnThrowItem;
 
             if (player?.InventoryController == null)
                 return;
