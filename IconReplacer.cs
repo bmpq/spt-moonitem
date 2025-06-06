@@ -22,7 +22,7 @@ namespace tarkin.moonitem
             if (__instance.Item.StringTemplateId != TheMoonItemController.guidMoon)
                 return;
 
-            if (Random.Range(0, 100f) > 0.7f * Plugin.ChanceMultiplier)
+            if (Random.Range(0, 100f) < 0.7f * Plugin.ChanceMultiplier)
                 return;
 
             Sprite originalSprite = ___MainImage.sprite;
