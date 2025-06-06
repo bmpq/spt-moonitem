@@ -48,6 +48,7 @@ namespace tarkin.moonitem
         bool lineOfSight;
 
         bool scale;
+        float scaleSpeed = 0.1f;
 
         GameObject iconEffect;
 
@@ -260,8 +261,11 @@ namespace tarkin.moonitem
 
         void LateUpdate() // after input and procedural animations
         {
-            if (scale)
-                TOD_Sky.Instance.Components.MoonTransform.localScale += new Vector3(12f, 12f, 12f) * Time.deltaTime;
+            if (scale && TOD_Sky.Instance.Moon.MeshSize < 18)
+            {
+                scaleSpeed += Time.deltaTime * 0.01f;
+                TOD_Sky.Instance.Moon.MeshSize += scaleSpeed * Time.deltaTime;
+            }
 
             if (looted || itemObject == null)
                 return;
